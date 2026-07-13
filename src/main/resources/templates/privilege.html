@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>偏爱特权</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <style>
+    .vip-card { background: linear-gradient(135deg, #FFF0F5, #F3E5F5); border: 2px solid #E1BEE7; border-radius: 20px; padding: 24px 20px; text-align: center; margin-bottom: 14px; position: relative; overflow: hidden; }
+    .vip-card.style1 { background: linear-gradient(135deg, #FFF0F5, #FCE4EC); border-color: #F8BBD0; }
+    .vip-card.style2 { background: linear-gradient(135deg, #F3E5F5, #EDE7F6); border-color: #D1C4E9; }
+    .vip-card.style3 { background: linear-gradient(135deg, #FFF8E1, #FFECB3); border-color: #FFE082; }
+    .vip-card.expired { opacity: 0.4; filter: grayscale(0.6); pointer-events: none; }
+    .vip-card .vip-badge { position: absolute; top: 12px; right: 12px; background: #FF69B4; color: white; padding: 3px 12px; border-radius: 12px; font-size: 11px; }
+    .vip-card .vip-icon { font-size: 48px; margin-bottom: 8px; }
+    .vip-card .vip-name { font-size: 17px; font-weight: 700; color: #6B5B6B; }
+    .vip-card .vip-desc { font-size: 13px; color: #A899A8; margin: 6px 0; }
+    .vip-card .vip-count { font-size: 14px; color: #FF69B4; font-weight: 600; }
+  </style>
+</head>
+<body>
+<div class="top-bar" id="topSlogan">🎀 Hello Kitty · 专属宠爱只属于你 🎀</div>
+
+<div class="main-container">
+  <div class="card">
+    <div class="card-title">我的犯错豁免卡</div>
+    <div id="cardList">
+      <div class="empty-state"><div class="icon">🃏</div><p>还没有豁免卡哦~<br>让宝宝给你发几张吧！</p></div>
+    </div>
+  </div>
+  <div class="card" style="text-align:center;">
+    <div style="font-size:40px;">💎</div>
+    <div style="font-size:14px;color:#A899A8;">我的爱心积分</div>
+    <div style="font-size:36px;font-weight:800;color:#FF69B4;" id="pointsDisplay">--</div>
+    <a href="/interaction" class="btn btn-outline btn-sm" style="margin-top:8px;">去积分商城兑换 →</a>
+  </div>
+</div>
+
+<div class="bottom-nav">
+  <a href="/home"><span class="icon">🏠</span>首页</a>
+  <a href="/comfort"><span class="icon">💊</span>情绪急救</a>
+  <a href="/interaction"><span class="icon">💞</span>互动</a>
+  <a href="/memory"><span class="icon">📸</span>记录</a>
+  <a href="/privilege" class="active"><span class="icon">👑</span>特权</a>
+</div>
+
+<script src="/js/api.js?v=2"></script>
+<script>
+(function(){
+var R=2;
+if(!getPassword())location.href='/';
+else{loadSlogan();loadCards();loadPoints();}
+
+function loadSlogan(){API.get('/system/config/public').then(function(r){if(r.code===200&&r.data.slogan)document.getElementById('topSlogan').textContent=r.data.slogan;});}
+
+async function loadCards(){
+  try{
+    var res=await API.get('/privilege/cards');
+    if(res.code===200&&res.data.length>0){
+      document.getElementById('cardList').innerHTML=res.data.map(function(c){
+        var expired=c.expireTime&&new Date(c.expireTime)<new Date();
+        var remain=c.remainCount;
+        var styles={1:'style1',2:'style2',3:'style3'};
+        var icons={1:'💗',2:'🌙',3:'👑'};
+        return '<div class="vip-card '+(styles[c.cardStyle]||'style1')+' '+(expired?'expired':'')+'">'+
+          (remain<=0?'<div class="vip-badge">已用完</div>':'')+
+          '<div class="vip-icon">'+(icons[c.cardStyle]||'💗')+'</div>'+
+          '<div class="vip-name">'+c.cardName+'</div>'+
+          '<div class="vip-desc">'+(c.cardDescription||'')+'</div>'+
+          '<div class="vip-count">剩余 <b>'+remain+'</b> 张</div>'+
+          (!expired&&remain>0?'<button class="btn btn-primary btn-sm" style="margin-top:8px;" onclick="useCard('+c.id+')">使用一张</button>':'')+
+        '</div>';
+      }).join('');
+    }
+  }catch(e){}
+}
+
+window.useCard=async function(id){
+  if(!confirm('确定使用一张豁免卡吗？'))return;
+  try{var res=await API.post('/privilege/card/use/'+id);if(res.code===200){showToast('豁免卡已使用！💚');showHearts(12);loadCards();}else showToast(res.msg);}catch(e){showToast('操作失败~');}
+};
+
+async function loadPoints(){
+  try{var res=await API.get('/interaction/points/balance',{role:R});if(res.code===200)document.getElementById('pointsDisplay').textContent=res.data;}catch(e){}
+}
+})();
+</script>
+</body>
+</html>

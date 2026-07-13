@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>互动升温 💞</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <style>
+    .tab-nav { display: flex; gap: 4px; margin-bottom: 16px; flex-wrap: wrap; }
+    .tab-nav .tab { padding: 8px 14px; border-radius: 18px; font-size: 13px; background: white; border: 1px solid rgba(248,165,194,0.3); cursor: pointer; transition: all 0.3s; }
+    .tab-nav .tab.active { background: #F8A5C2; color: white; border-color: transparent; }
+    .tab-panel { display: none; } .tab-panel.active { display: block; }
+    .check-calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-top: 12px; }
+    .check-calendar .day-header { font-size: 11px; color: #A899A8; padding: 4px 0; }
+    .check-calendar .day-cell { padding: 8px 0; border-radius: 8px; font-size: 12px; }
+    .check-calendar .day-cell.checked { background: #F8A5C2; color: white; }
+    .goods-card { display: flex; gap: 12px; background: white; border-radius: 16px; padding: 14px; margin-bottom: 10px; border: 1px solid rgba(248,165,194,0.3); align-items: center; }
+    .goods-card .g-img { width: 60px; height: 60px; border-radius: 12px; background: rgba(248,165,194,0.3); display: flex; align-items: center; justify-content: center; font-size: 30px; flex-shrink: 0; }
+    .goods-card .g-info { flex: 1; } .goods-card .g-name { font-size: 14px; font-weight: 600; }
+    .goods-card .g-points { font-size: 12px; color: #FF69B4; margin-top: 4px; }
+    .goods-card .g-btn { padding: 8px 16px; border-radius: 16px; font-size: 12px; background: #F8A5C2; color: white; border: none; cursor: pointer; }
+    .msg-item { background: white; border-radius: 16px; padding: 14px; margin-bottom: 10px; border: 1px solid rgba(248,165,194,0.3); }
+    .msg-item .msg-header { font-size: 12px; color: #A899A8; margin-bottom: 6px; }
+    .msg-item .msg-body { font-size: 14px; line-height: 1.6; }
+    .truth-card { background: white; border-radius: 20px; padding: 30px 20px; text-align: center; margin-bottom: 16px; box-shadow: 0 2px 12px rgba(255,182,193,0.2); cursor: pointer; }
+    .truth-card .question { font-size: 17px; color: #6B5B6B; line-height: 1.8; }
+    .truth-card .hint { font-size: 12px; color: #ccc; margin-top: 12px; }
+    .gift-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+    .gift-item { background: white; border-radius: 16px; padding: 16px 8px; text-align: center; border: 2px solid rgba(248,165,194,0.3); cursor: pointer; transition: all 0.3s; }
+    .gift-item:active { transform: scale(0.9); }
+    .gift-item .gift-emoji { font-size: 40px; }
+    .gift-item .gift-name { font-size: 12px; color: #6B5B6B; margin-top: 6px; }
+    .gift-item .gift-cost { font-size: 11px; color: #FF69B4; margin-top: 4px; }
+  </style>
+</head>
+<body>
+<div class="top-bar" id="topSlogan">🎀 Hello Kitty · 专属宠爱只属于你 🎀</div>
+<div class="main-container">
+  <div class="tab-nav">
+    <div class="tab active" onclick="switchTab('checkin',this)">📅 打卡</div>
+    <div class="tab" onclick="switchTab('mall',this)">🛍️ 积分商城</div>
+    <div class="tab" onclick="switchTab('truth',this)">💬 真心话</div>
+    <div class="tab" onclick="switchTab('chemistry',this)">🎯 默契测试</div>
+    <div class="tab" onclick="switchTab('reward',this)">🎁 对自己的奖励</div>
+    <div class="tab" onclick="switchTab('message',this)">💌 悄悄话</div>
+  </div>
+
+  <div class="tab-panel active" id="panel-checkin">
+    <div class="card" style="text-align:center;">
+      <div style="font-size:48px;">💗</div>
+      <div style="font-size:16px;font-weight:600;color:#6B5B6B;margin:8px 0;">今天也很爱你</div>
+      <div style="font-size:13px;color:#A899A8;">连续打卡 <b id="consecutiveDays">--</b> 天</div>
+      <button class="btn btn-primary btn-lg" style="margin-top:14px;" onclick="doCheckIn()">💕 甜蜜打卡 +10分</button>
+    </div>
+    <div class="card">
+      <div class="card-title">📅 本月打卡日历</div>
+      <div class="check-calendar">
+        <div class="day-header">日</div><div class="day-header">一</div><div class="day-header">二</div><div class="day-header">三</div><div class="day-header">四</div><div class="day-header">五</div><div class="day-header">六</div>
+      </div>
+      <div class="check-calendar" id="calendarGrid"></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="panel-mall">
+    <div class="card" style="text-align:center;">
+      <div style="font-size:14px;color:#A899A8;">💎 我的爱心积分</div>
+      <div style="font-size:36px;font-weight:800;color:#FF69B4;" id="myPoints">--</div>
+    </div>
+    <div id="goodsList"></div>
+  </div>
+
+  <div class="tab-panel" id="panel-truth">
+    <div class="truth-card" onclick="getTruthQuestion()">
+      <div class="question" id="truthQuestion">点击卡片获取真心话问题 💭</div>
+      <div class="hint">💡 点击翻转看下一题</div>
+    </div>
+    <div style="text-align:center;"><button class="btn btn-outline btn-sm" onclick="getTruthQuestion()">🔄 换一题</button></div>
+  </div>
+
+  <div class="tab-panel" id="panel-chemistry">
+    <div class="card" style="text-align:center;">
+      <div style="font-size:40px;">🎯</div>
+      <div style="font-size:16px;font-weight:600;color:#6B5B6B;margin:8px 0;">默契度测试</div>
+      <button class="btn btn-primary" style="margin-top:14px;" onclick="startChemistryTest()">💕 开始测试</button>
+    </div>
+    <div id="chemistryResult" style="display:none;">
+      <div class="card" style="text-align:center;">
+        <div style="font-size:48px;" id="chemistryEmoji"></div>
+        <div style="font-size:28px;font-weight:800;color:#FF69B4;" id="chemistryScore"></div>
+        <div style="font-size:16px;color:#6B5B6B;" id="chemistryLevel"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="panel-reward">
+    <div class="card" style="text-align:center;">
+      <div style="font-size:14px;color:#A899A8;">💎 爱心积分：<b style="color:#FF69B4;" id="rewardPoints">--</b></div>
+      <div style="font-size:12px;color:#A899A8;margin-top:4px;">用积分兑换奖励，由宝宝后台定价</div>
+    </div>
+    <div class="gift-grid" id="rewardGrid"></div>
+  </div>
+
+  <div class="tab-panel" id="panel-message">
+    <div id="messageList"></div>
+  </div>
+</div>
+
+<div class="bottom-nav">
+  <a href="/home"><span class="icon">🏠</span>首页</a>
+  <a href="/comfort"><span class="icon">💊</span>情绪急救</a>
+  <a href="/interaction" class="active"><span class="icon">💞</span>互动</a>
+  <a href="/memory"><span class="icon">📸</span>记录</a>
+  <a href="/privilege"><span class="icon">👑</span>特权</a>
+</div>
+
+<div class="input-area" id="msgInputArea" style="display:none;">
+  <input type="text" id="msgInput" placeholder="写一句悄悄话..." maxlength="500">
+  <button onclick="sendMessage()">发送 💌</button>
+</div>
+
+<div class="modal-overlay" id="chemModal" style="display:none;">
+  <div class="modal-box" style="max-width:90%;">
+    <div style="font-size:16px;font-weight:700;color:#FF69B4;margin-bottom:12px;" id="chemQuestion"></div>
+    <div id="chemOptions" style="display:flex;flex-direction:column;gap:8px;"></div>
+    <div style="font-size:12px;color:#A899A8;margin-top:8px;" id="chemProgress"></div>
+  </div>
+</div>
+
+<script src="/js/api.js?v=2"></script>
+<script>
+(function(){
+'use strict';
+function fmtTime(t){if(!t)return '';var d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+var R=2;var boyNick='宝宝';var girlNick='女朋友';
+var CT='checkin';
+function loadConfig2(){API.get('/system/config/public').then(function(r){if(r.code===200){boyNick=r.data.boyNickname||'宝宝';girlNick=r.data.girlNickname||'女朋友';if(r.data.slogan)document.getElementById('topSlogan').textContent=r.data.slogan;}});}
+var ci=0,cs=0,cq=[];
+
+if(!getPassword())location.href='/';
+else{loadConfig2();loadCheckIn();loadPoints();loadGoods();loadMessages();}
+
+window.switchTab=function(tab,el){
+  document.querySelectorAll('.tab-nav .tab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('active');});
+  el.classList.add('active');
+  var p=document.getElementById('panel-'+tab);
+  if(p)p.classList.add('active');
+  CT=tab;
+  var ia=document.getElementById('msgInputArea');
+  if(ia)ia.style.display=tab==='message'?'flex':'none';
+  if(tab==='mall'||tab==='reward')loadPoints();
+  if(tab==='message')loadMessages();
+  if(tab==='reward')loadRewards();
+};
+
+async function loadCheckIn(){
+  try{
+    var r=await API.get('/interaction/check-in/stats',{role:R});
+    if(r.code===200)document.getElementById('consecutiveDays').textContent=r.data.maxConsecutiveDays||0;
+    var now=new Date();
+    var m=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+    var cr=await API.get('/interaction/check-in/calendar',{role:R,month:m});
+    if(cr.code===200)renderCal(cr.data);
+  }catch(e){}
+}
+function renderCal(dates){
+  var g=document.getElementById('calendarGrid');
+  var now=new Date();
+  var fd=new Date(now.getFullYear(),now.getMonth(),1).getDay();
+  var dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+  var h='';
+  for(var i=0;i<fd;i++)h+='<div></div>';
+  var ds={};
+  if(dates&&dates.length)for(var j=0;j<dates.length;j++){
+    var d=dates[j];var day=typeof d==='string'?d.substring(8,10):String(d).substring(8,10);ds[day]=true;
+  }
+  for(var d2=1;d2<=dim;d2++){
+    var dk=String(d2).padStart(2,'0');
+    var cl=ds[dk]?'checked':'';var td=d2===now.getDate()?' today':'';
+    h+='<div class="day-cell '+cl+td+'">'+d2+'</div>';
+  }
+  g.innerHTML=h;
+}
+window.doCheckIn=async function(){
+  try{
+    var r=await API.post('/interaction/check-in',{role:R});
+    if(r.code===200){showToast('打卡成功！💗');showHearts(10);loadCheckIn();}
+    else showToast(r.msg);
+  }catch(e){showToast('打卡失败~');}
+};
+async function loadPoints(){
+  try{var r=await API.get('/interaction/points/balance',{role:R});if(r.code===200){document.getElementById('myPoints').textContent=r.data;var rp=document.getElementById('rewardPoints');if(rp)rp.textContent=r.data;}}catch(e){}
+}
+async function loadGoods(){
+  try{
+    var r=await API.get('/interaction/benefit/list');
+    if(r.code===200&&r.data.records){
+      document.getElementById('goodsList').innerHTML=r.data.records.map(function(g){
+        return '<div class="goods-card"><div class="g-img">'+(g.imageUrl?'<img src="'+g.imageUrl+'" style="width:100%;height:100%;border-radius:12px;object-fit:cover;">':'🎁')+'</div><div class="g-info"><div class="g-name">'+g.name+'</div><div class="g-points">💎 '+g.points+' 积分</div><div style="font-size:11px;color:#A899A8;">'+(g.description||'')+'</div></div><button class="g-btn" onclick="exchangeBenefit('+g.id+')">兑换</button></div>';
+      }).join('');
+    }
+  }catch(e){}
+}
+window.exchangeBenefit=async function(id){
+  if(!confirm('确认兑换？'))return;
+  try{var r=await API.post('/interaction/benefit/exchange/'+id,{role:R});if(r.code===200){showToast('兑换成功！💗');showHearts(10);loadPoints();}else showToast(r.msg);}catch(e){showToast('兑换失败~');}
+};
+window.getTruthQuestion=async function(){
+  try{var r=await API.get('/interaction/truth/random');if(r.code===200&&r.data)document.getElementById('truthQuestion').textContent='💭 '+r.data.question;}catch(e){}
+};
+window.startChemistryTest=function(){
+  ci=0;cs=0;
+  API.get('/interaction/chemistry/questions').then(function(r){
+    if(r.code===200&&r.data&&r.data.length>0){
+      cq=r.data.map(function(q){return {q:q.question,opts:JSON.parse(q.opts||'[]'),ans:q.answer};});
+    }else{
+      cq=[{q:'宝宝最喜欢的颜色？',opts:['粉色','蓝色','黑色','白色'],ans:1},{q:'宝宝最爱的食物？',opts:['火锅','烧烤','甜点','家常菜'],ans:2}];
+    }
+    document.getElementById('chemModal').style.display='flex';showCQ();
+  }).catch(function(){
+    cq=[{q:'宝宝最喜欢的颜色？',opts:['粉色','蓝色','黑色','白色'],ans:1}];
+    document.getElementById('chemModal').style.display='flex';showCQ();
+  });
+};
+function showCQ(){
+  if(ci>=cq.length){finishC();return;}
+  var q=cq[ci];
+  document.getElementById('chemQuestion').textContent='第'+(ci+1)+'/10题：'+q.q;
+  document.getElementById('chemOptions').innerHTML=q.opts.map(function(o,i){return '<button class="btn btn-outline" style="text-align:left;" onclick="answerChem('+i+')">'+o+'</button>';}).join('');
+}
+window.answerChem=function(idx){if(idx===cq[ci].ans)cs+=10;ci++;showCQ();};
+async function finishC(){
+  document.getElementById('chemModal').style.display='none';
+  try{var r=await API.post('/interaction/chemistry/submit',{score:cs});if(r.code===200){document.getElementById('chemistryResult').style.display='block';document.getElementById('chemistryEmoji').textContent=cs>=90?'💯':cs>=70?'💕':'💗';document.getElementById('chemistryScore').textContent=cs+'分';document.getElementById('chemistryLevel').textContent=r.data.level;showHearts(12);}}catch(e){}
+}
+async function loadMessages(){
+  try{
+    var r=await API.get('/interaction/messages');
+    var c=document.getElementById('messageList');
+    if(r.code===200&&r.data.records&&r.data.records.length>0){
+      c.innerHTML=r.data.records.map(function(m){return '<div class="msg-item"><div class="msg-header">'+(m.role===1?'👦 '+boyNick:'👧 '+girlNick)+' · '+fmtTime(m.createTime)+'</div><div class="msg-body">'+m.content+'</div></div>';}).join('');
+    }else{c.innerHTML='<div class="empty-state"><div class="icon">💌</div><p>还没有悄悄话哦<br>快给TA写一句吧~</p></div>';}
+  }catch(e){}
+}
+window.sendMessage=async function(){
+  var i=document.getElementById('msgInput');
+  var c=i.value.trim();
+  if(!c)return;
+  try{await API.post('/interaction/message',{role:R,content:c});i.value='';showToast('悄悄话已发送💌');loadMessages();}catch(e){showToast('发送失败~');}
+};
+function loadRewards(){
+  loadPoints();
+  API.get('/interaction/benefit/list').then(function(r){
+    var h='';
+    if(r.code===200&&r.data.records&&r.data.records.length>0){
+      r.data.records.forEach(function(g){
+        if(g.status!=1)return;
+        var img=g.imageUrl?'<img src="'+g.imageUrl+'" style="width:50px;height:50px;border-radius:12px;object-fit:cover;">':'🎁';
+        h+='<div class="gift-item" onclick="exchangeBenefit('+g.id+')"><div class="gift-emoji">'+img+'</div><div class="gift-name">'+g.name+'</div><div class="gift-cost">💎'+g.points+'</div></div>';
+      });
+    }
+    if(!h)h='<div class="empty-state"><p>宝宝还没上架奖励商品哦~<br>去后台福利商城添加吧</p></div>';
+    document.getElementById('rewardGrid').innerHTML=h;
+  });
+}
+})();
+</script>
+</body>
+</html>

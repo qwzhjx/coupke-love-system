@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>专属宠爱空间 💕</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <style>
+    .hero-card {
+      background: linear-gradient(135deg, #F8A5C2, #F3E5F5);
+      border-radius: 24px;
+      padding: 28px 20px;
+      text-align: center;
+      color: white;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-card::after {
+      content: '💕';
+      position: absolute; right: 10px; top: 10px;
+      font-size: 40px; opacity: 0.3;
+    }
+    .hero-days { font-size: 42px; font-weight: 800; }
+    .hero-label { font-size: 13px; opacity: 0.9; margin: 4px 0; }
+    .hero-slogan { font-size: 14px; margin-top: 8px; letter-spacing: 1px; opacity: 0.95; }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .feature-card {
+      background: white;
+      border-radius: 20px;
+      padding: 20px 14px;
+      text-align: center;
+      box-shadow: 0 2px 12px rgba(255,182,193,0.2);
+      border: 1px solid rgba(248,165,194,0.3);
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .feature-card:active { transform: scale(0.95); }
+    .feature-card .f-icon { font-size: 36px; margin-bottom: 8px; }
+    .feature-card .f-title { font-size: 14px; font-weight: 600; color: #6B5B6B; }
+    .feature-card .f-desc { font-size: 11px; color: #A899A8; margin-top: 4px; }
+
+    .surprise-banner {
+      background: linear-gradient(135deg, #FFF0F5, #EDE4F3);
+      border: 2px dashed #F3E5F5;
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .surprise-banner:active { transform: scale(0.97); }
+    .surprise-banner .s-icon { font-size: 28px; }
+    .surprise-banner .s-text { font-size: 13px; color: #A899A8; margin-top: 6px; }
+  </style>
+</head>
+<body>
+
+<!-- 顶部标语 -->
+<div class="top-bar" id="topSlogan">🎀 Hello Kitty · 专属宠爱只属于你 🎀</div>
+
+<div class="main-container">
+
+  <!-- 恋爱天数卡片 -->
+  <div class="hero-card" style="background: linear-gradient(135deg, #F8A5C2, #FF69B4); border: 3px dotted rgba(255,255,255,0.5);">
+    <div class="hero-label">🎀 认识已经</div>
+    <div class="hero-days" id="loveDays">--</div>
+    <div class="hero-label">天</div>
+    <div class="hero-slogan">每一天都比昨天更爱你一点 🎀💗</div>
+  </div>
+
+  <!-- 每日惊喜 -->
+  <div class="surprise-banner" onclick="openSurprise()" style="background: linear-gradient(135deg, #FFF0F5, #F3E5F5); border: 2px dashed #F8A5C2;">
+    <div class="s-icon">🎀</div>
+    <div class="s-text">点我开启今日 Kitty 专属惊喜 ✨</div>
+  </div>
+
+  <!-- 功能入口 -->
+  <div class="feature-grid">
+    <a href="/comfort" class="feature-card">
+      <div class="f-icon">💊</div>
+      <div class="f-title">情绪急救</div>
+      <div class="f-desc">一键哄我开心</div>
+    </a>
+    <a href="/interaction" class="feature-card">
+      <div class="f-icon">💞</div>
+      <div class="f-title">互动升温</div>
+      <div class="f-desc">打卡·积分·留言</div>
+    </a>
+    <a href="/memory" class="feature-card">
+      <div class="f-icon">📸</div>
+      <div class="f-title">恋爱记录</div>
+      <div class="f-desc">时光轴·相册</div>
+    </a>
+    <a href="/privilege" class="feature-card">
+      <div class="f-icon">👑</div>
+      <div class="f-title">偏爱特权</div>
+      <div class="f-desc">豁免卡·惊喜</div>
+    </a>
+  </div>
+
+  <!-- 今日甜蜜任务 -->
+  <div class="card" style="cursor:pointer;background:linear-gradient(135deg,#FFF0F5,#F3E5F5);" onclick="refreshTask()">
+    <div class="card-title">🎯 今日甜蜜任务</div>
+    <div style="font-size:18px;text-align:center;padding:10px;" id="dailyTask">--</div>
+    <div style="font-size:11px;color:#A899A8;text-align:center;">点击刷新任务 ✨</div>
+  </div>
+
+  <!-- 里程碑 -->
+  <div class="card" id="milestoneCard" style="display:none;background:linear-gradient(135deg,#F8A5C2,#F3E5F5);color:white;text-align:center;">
+    <div style="font-size:40px;" id="milestoneIcon">🏆</div>
+    <div style="font-size:18px;font-weight:700;" id="milestoneText"></div>
+  </div>
+
+  <!-- 纪念日提醒 -->
+  <div class="card" id="anniversaryReminder" style="display:none;">
+    <div class="card-title">📅 即将到来的纪念日</div>
+    <div id="reminderContent"></div>
+  </div>
+
+  <!-- SOS 快速求助 -->
+  <div class="card" style="text-align:center;">
+    <div style="font-size:13px;color:#A899A8;">心情不好？点这里让宝宝马上知道 🆘</div>
+    <button class="btn btn-outline btn-sm" style="margin-top:8px;animation:pulse 2s infinite;" onclick="sendSOS()">🆘 快来哄我</button>
+  </div>
+
+</div>
+
+<!-- 底部导航 -->
+<div class="bottom-nav">
+  <a href="/home" class="active"><span class="icon">🏠</span>首页</a>
+  <a href="/comfort"><span class="icon">💊</span>情绪急救</a>
+  <a href="/interaction"><span class="icon">💞</span>互动</a>
+  <a href="/memory"><span class="icon">📸</span>记录</a>
+  <a href="/privilege"><span class="icon">👑</span>特权</a>
+</div>
+
+<!-- 惊喜弹窗 -->
+<div class="modal-overlay" id="surpriseModal" style="display:none;" onclick="closeSurprise(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div style="font-size:48px;" id="surpriseIcon">🎁</div>
+    <div style="font-size:18px;font-weight:700;margin:12px 0;color:#FF69B4;" id="surpriseTitle"></div>
+    <div style="font-size:14px;color:#6B5B6B;line-height:1.8;" id="surpriseContent"></div>
+    <button class="btn btn-primary" style="margin-top:16px;" onclick="document.getElementById('surpriseModal').style.display='none'">💗 收到</button>
+  </div>
+</div>
+
+<script src="/js/api.js?v=2"></script>
+<script>
+let surpriseShown = false;
+
+var DAILY_TASKS = [
+  '💋 今天亲TA一下，要说"我爱你"', '📝 给TA写一句悄悄话', '🤗 给TA一个持续20秒的拥抱',
+  '🍰 今天一起分享一份甜点', '📷 拍一张今天的合照', '🎵 分享一首你喜欢的歌给TA',
+  '💌 说一个你们之间最甜的回忆', '🌸 给TA发一条暖心的早安/晚安', '👫 今天牵手散步10分钟',
+  '☕ 给TA泡一杯TA喜欢的饮品', '🎀 今天要夸TA三个优点', '🌟 一起看一次日落或星空'
+];
+var milestoneDays = [100, 200, 300, 365, 500, 666, 730, 888, 999, 1000, 1314];
+
+function refreshTask() {
+  var t = DAILY_TASKS[Math.floor(Math.random() * DAILY_TASKS.length)];
+  document.getElementById('dailyTask').textContent = t;
+  localStorage.setItem('dailyTask', t);
+  localStorage.setItem('taskDate', todayStr());
+}
+
+function checkMilestone(days) {
+  if (milestoneDays.indexOf(Number(days)) >= 0) {
+    document.getElementById('milestoneCard').style.display = 'block';
+    document.getElementById('milestoneText').textContent = '🎉 ' + days + '天纪念日快乐！';
+    document.getElementById('milestoneIcon').textContent = days >= 1000 ? '💎' : days >= 500 ? '👑' : '🏆';
+    showHearts(25);
+  }
+}
+
+async function sendSOS() {
+  try {
+    await API.post('/interaction/message', { role: 2, content: '🆘 心情不好，宝宝快来哄我！💔' });
+    showToast('SOS已发送！宝宝会马上来哄你的 💗');
+    showHearts(15);
+  } catch(e) { showToast('发送失败~'); }
+}
+
+async function init() {
+  if (!getPassword()) { location.href = '/'; return; }
+  // 每日任务
+  var savedTask = localStorage.getItem('dailyTask');
+  var savedDate = localStorage.getItem('taskDate');
+  if (savedTask && savedDate === todayStr()) {
+    document.getElementById('dailyTask').textContent = savedTask;
+  } else {
+    refreshTask();
+  }
+  try {
+    const loveRes = await API.get('/memory/love-days');
+    if (loveRes.code === 200) {
+      document.getElementById('loveDays').textContent = loveRes.data.days;
+      checkMilestone(loveRes.data.days);
+    }
+    const configRes = await API.get('/system/config/public');
+    if (configRes.code === 200 && configRes.data.slogan) {
+      document.getElementById('topSlogan').textContent = configRes.data.slogan;
+    }
+    const anniRes = await API.get('/memory/anniversaries');
+    if (anniRes.code === 200 && anniRes.data.length > 0) {
+      const upcoming = anniRes.data.filter(function(a) { return a.remainDays <= 3 && a.remainDays >= 0; });
+      if (upcoming.length > 0) {
+        document.getElementById('anniversaryReminder').style.display = 'block';
+        document.getElementById('reminderContent').innerHTML = upcoming.map(function(a) {
+          return '<div style="padding:8px 0;color:#FF69B4;">💝 <b>' + a.name + '</b> — 还有 <b>' + a.remainDays + '</b> 天</div>';
+        }).join('');
+      }
+    }
+  } catch(e) { console.error(e); }
+}
+
+async function openSurprise() {
+  if (surpriseShown) {
+    showToast('今日惊喜已开启过啦，明天再来吧~ 💗');
+    return;
+  }
+  try {
+    const res = await API.get('/privilege/surprise/daily');
+    if (res.code === 200) {
+      surpriseShown = true;
+      const icons = {1:'💌',2:'🧧',3:'🏷️',4:'🥚'};
+      document.getElementById('surpriseIcon').textContent = icons[res.data.type] || '🎁';
+      document.getElementById('surpriseTitle').textContent = '今日专属惊喜';
+      document.getElementById('surpriseContent').textContent = res.data.content;
+      document.getElementById('surpriseModal').style.display = 'flex';
+      showHearts(12);
+    }
+  } catch(e) {
+    showToast('网络开小差了~');
+  }
+}
+
+function closeSurprise(e) {
+  if (e.target.id === 'surpriseModal') {
+    document.getElementById('surpriseModal').style.display = 'none';
+  }
+}
+
+init();
+</script>
+</body>
+</html>

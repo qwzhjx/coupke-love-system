@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>恋爱记录 📸</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <style>
+    .tab-nav { display: flex; gap: 4px; margin-bottom: 16px; }
+    .tab-nav .tab { padding: 8px 14px; border-radius: 18px; font-size: 13px; background: white; border: 1px solid rgba(248,165,194,0.3); cursor: pointer; transition: all 0.3s; }
+    .tab-nav .tab.active { background: #F8A5C2; color: white; border-color: transparent; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .timeline-item { position: relative; padding: 0 0 20px 30px; border-left: 2px solid #F3E5F5; }
+    .timeline-item:last-child { border-left-color: transparent; }
+    .timeline-item::before { content: '💗'; position: absolute; left: -13px; top: 0; font-size: 14px; }
+    .timeline-item .tl-date { font-size: 12px; color: #A899A8; }
+    .timeline-item .tl-name { font-size: 15px; font-weight: 600; color: #FF69B4; margin: 4px 0; }
+    .timeline-item .tl-countdown { font-size: 13px; color: #F8A5C2; }
+
+    .mood-btn { display: inline-block; padding: 10px 16px; border-radius: 20px; font-size: 28px; cursor: pointer; background: white; border: 2px solid rgba(248,165,194,0.3); margin: 4px; transition: all 0.3s; text-align: center; }
+    .mood-btn:active { transform: scale(0.9); }
+    .mood-btn.selected { border-color: #FF69B4; background: #FFF0F5; }
+    .mood-btn span { display: block; font-size: 10px; color: #A899A8; margin-top: 4px; }
+
+    .photo-item { position: relative; cursor: pointer; }
+    .photo-item img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px; border: 2px solid rgba(248,165,194,0.3); }
+  </style>
+</head>
+<body>
+<div class="top-bar" id="topSlogan">🎀 Hello Kitty · 专属宠爱只属于你 🎀</div>
+
+<div class="main-container">
+  <div class="tab-nav">
+    <div class="tab active" onclick="switchTab('timeline',this)">⏳ 时光轴</div>
+    <div class="tab" onclick="switchTab('album',this)">📷 相册</div>
+    <div class="tab" onclick="switchTab('mood',this)">📝 情绪日记</div>
+  </div>
+
+  <!-- 时光轴 -->
+  <div class="tab-panel active" id="panel-timeline">
+    <div class="card" style="text-align:center;">
+      <div style="font-size:14px;color:#A899A8;">💗 认识已经</div>
+      <div style="font-size:48px;font-weight:800;color:var(--deep-pink);" id="loveDays2">--</div>
+      <div style="font-size:14px;color:#A899A8;">天</div>
+    </div>
+    <div class="card">
+      <div class="card-title">📅 纪念日</div>
+      <div id="anniversaryList"></div>
+    </div>
+  </div>
+
+  <!-- 相册 -->
+  <div class="tab-panel" id="panel-album">
+    <div style="margin-bottom:12px;">
+      <label class="btn btn-primary btn-block" for="photoInput">📷 上传照片</label>
+      <input type="file" id="photoInput" accept="image/*" multiple style="display:none;" onchange="uploadPhotos()">
+    </div>
+    <div class="photo-grid" id="photoGrid"></div>
+  </div>
+
+  <!-- 情绪日记 -->
+  <div class="tab-panel" id="panel-mood">
+    <div class="card">
+      <div class="card-title">💭 今天的心情怎么样？</div>
+      <div style="display:flex;justify-content:center;flex-wrap:wrap;gap:6px;" id="moodButtons">
+        <div class="mood-btn" onclick="selectMood(1,this)">😊<span>开心</span></div>
+        <div class="mood-btn" onclick="selectMood(2,this)">😐<span>一般</span></div>
+        <div class="mood-btn" onclick="selectMood(3,this)">😢<span>难过</span></div>
+        <div class="mood-btn" onclick="selectMood(4,this)">😡<span>生气</span></div>
+        <div class="mood-btn" onclick="selectMood(5,this)">🥰<span>幸福</span></div>
+      </div>
+      <textarea id="moodNote" class="form-input" style="margin-top:12px;border-radius:16px;" placeholder="写点什么吧（可选）..." rows="2"></textarea>
+      <button class="btn btn-primary btn-block" style="margin-top:10px;" onclick="saveMood()">💗 记录心情</button>
+    </div>
+    <div class="card">
+      <div class="card-title">📊 情绪趋势</div>
+      <div id="moodTrend" style="text-align:center;padding:12px;">
+        <button class="btn btn-outline btn-sm" onclick="loadMoodTrend()">查看情绪分布</button>
+        <div id="trendResult" style="margin-top:12px;"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 最近记录</div>
+      <div id="moodList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-nav">
+  <a href="/home"><span class="icon">🏠</span>首页</a>
+  <a href="/comfort"><span class="icon">💊</span>情绪急救</a>
+  <a href="/interaction"><span class="icon">💞</span>互动</a>
+  <a href="/memory" class="active"><span class="icon">📸</span>记录</a>
+  <a href="/privilege"><span class="icon">👑</span>特权</a>
+</div>
+
+<script src="/js/api.js?v=2"></script>
+<script>
+let selectedMood = null;
+
+function init() {
+  if (!getPassword()) { location.href = '/'; return; }
+  loadSlogan();
+  loadTimeline();
+  loadPhotos();
+  loadMoodDiaries();
+}
+
+function loadSlogan() {
+  API.get('/system/config/public').then(function(r) {
+    if (r.code === 200 && r.data.slogan) {
+      document.getElementById('topSlogan').textContent = r.data.slogan;
+    }
+  });
+}
+
+function switchTab(tab, el) {
+  document.querySelectorAll('.tab-nav .tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+}
+
+// ===== 时光轴 =====
+async function loadTimeline() {
+  try {
+    const loveRes = await API.get('/memory/love-days');
+    if (loveRes.code === 200) document.getElementById('loveDays2').textContent = loveRes.data.days;
+    const anniRes = await API.get('/memory/anniversaries');
+    if (anniRes.code === 200 && anniRes.data.length > 0) {
+      document.getElementById('anniversaryList').innerHTML = anniRes.data.map(a => `
+        <div class="timeline-item">
+          <div class="tl-date">${a.anniversaryDate}</div>
+          <div class="tl-name">${a.icon||'💝'} ${a.name}</div>
+          <div class="tl-countdown">${a.remainDays <= 0 ? '🎉 就是今天！' : '还有 <b>'+a.remainDays+'</b> 天'}</div>
+        </div>`).join('');
+    } else {
+      document.getElementById('anniversaryList').innerHTML = '<div class="empty-state"><p>暂无纪念日~</p></div>';
+    }
+  } catch(e) {}
+}
+
+// ===== 相册 =====
+async function loadPhotos() {
+  try {
+    const res = await API.get('/memory/photos');
+    const grid = document.getElementById('photoGrid');
+    if (res.code === 200 && res.data.records && res.data.records.length > 0) {
+      grid.innerHTML = res.data.records.map(p => `
+        <div class="photo-item" onclick="window.open('${p.url}')">
+          <img src="${p.thumbnail || p.url}" alt="${p.description||''}" loading="lazy">
+        </div>`).join('');
+    } else {
+      grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="icon">📷</div><p>还没有照片哦<br>快上传你们的甜蜜合照吧~</p></div>';
+    }
+  } catch(e) {}
+}
+
+async function uploadPhotos() {
+  const files = document.getElementById('photoInput').files;
+  if (!files.length) return;
+  for (const file of files) {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('description', '');
+    try {
+      const res = await API.upload('/memory/photo/upload', fd);
+      if (res.code === 200) showToast('上传成功！');
+    } catch(e) { showToast('上传失败~'); }
+  }
+  document.getElementById('photoInput').value = '';
+  loadPhotos();
+}
+
+// ===== 情绪日记 =====
+function selectMood(mood, el) {
+  selectedMood = mood;
+  document.querySelectorAll('#moodButtons .mood-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+async function saveMood() {
+  if (!selectedMood) { showToast('请选择一个心情哦~'); return; }
+  try {
+    await API.post('/memory/mood/diary', {
+      mood: selectedMood,
+      note: document.getElementById('moodNote').value,
+      isPrivate: 0
+    });
+    showToast('心情已记录 💗');
+    document.getElementById('moodNote').value = '';
+    selectedMood = null;
+    document.querySelectorAll('#moodButtons .mood-btn').forEach(b => b.classList.remove('selected'));
+    loadMoodDiaries();
+  } catch(e) { showToast('记录失败~'); }
+}
+
+async function loadMoodDiaries() {
+  try {
+    const res = await API.get('/memory/mood/diary', { page: 1, size: 10, type: 2 });
+    const container = document.getElementById('moodList');
+    if (res.code === 200 && res.data.records && res.data.records.length > 0) {
+      container.innerHTML = res.data.records.map(d => `
+        <div style="padding:10px 0;border-bottom:1px solid rgba(248,165,194,0.3);">
+          <span style="font-size:18px;">${d.moodText||''}</span>
+          <span style="font-size:12px;color:#A899A8;margin-left:8px;">${d.createTime||''}</span>
+          ${d.note ? '<div style="font-size:13px;color:#6B5B6B;margin-top:4px;">'+d.note+'</div>' : ''}
+        </div>`).join('');
+    } else {
+      container.innerHTML = '<div style="text-align:center;padding:12px;color:#A899A8;">还没有手动记录的心情~</div>';
+    }
+  } catch(e) {}
+}
+
+async function loadMoodTrend() {
+  try {
+    const res = await API.get('/memory/mood/trend');
+    if (res.code === 200) {
+      const labels = {1:'😊开心',2:'😐一般',3:'😢难过',4:'😡生气',5:'🥰幸福'};
+      document.getElementById('trendResult').innerHTML = Object.entries(res.data)
+        .filter(([k,v]) => v > 0)
+        .map(([k,v]) => `<div style="display:inline-block;margin:8px 12px;text-align:center;"><div style="font-size:24px;">${labels[k]}</div><div style="font-size:14px;color:#FF69B4;"><b>${v}</b>次</div></div>`).join('');
+    }
+  } catch(e) {}
+}
+
+init();
+</script>
+</body>
+</html>

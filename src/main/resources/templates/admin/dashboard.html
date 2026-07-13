@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🎀 Kitty 后台管理</title>
+<link rel="stylesheet" href="/css/app.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#FFF0F5;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+.app{max-width:600px;margin:0 auto;padding:50px 12px 100px}
+.topbar{position:fixed;top:0;left:0;right:0;z-index:99;background:linear-gradient(135deg,#F8A5C2,#FF69B4);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;font-size:14px;border-bottom:3px dotted rgba(255,255,255,0.5)}
+.topbar button{background:rgba(255,255,255,.2);border:none;color:#fff;padding:6px 14px;border-radius:14px;font-size:13px;cursor:pointer}
+.card{background:#fff;border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 1px 6px rgba(0,0,0,.04)}
+.card h3{font-size:15px;color:#FF69B4;margin-bottom:10px}
+.fr{display:flex;gap:8px;margin-bottom:8px}
+.fr input,.fr select,.fr textarea{flex:1;padding:10px 12px;border:2px solid rgba(248,165,194,0.35);border-radius:12px;font-size:13px;outline:none;background:#FFF0F5}
+.fr textarea{min-height:80px;resize:vertical}
+.btn{padding:10px 18px;border-radius:20px;border:none;font-size:13px;cursor:pointer}.btn:active{transform:scale(.95)}
+.bp{background:#F8A5C2;color:#fff}.bo{background:#fff;color:#E60012;border:2px solid #F8A5C2}.bs2{padding:6px 12px;font-size:12px}.br{background:#ff5252;color:#fff}
+.li{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #FFF0F5;gap:8px}
+.li .c{flex:1;font-size:13px}.li .a{display:flex;gap:6px;flex-shrink:0}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px}.ton{background:#F8A5C2;color:#fff}.toff{background:#eee;color:#999}
+.tabs{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap}
+.tabs span{padding:6px 12px;border-radius:14px;font-size:12px;background:#fff;border:1px solid rgba(248,165,194,0.3);cursor:pointer}
+.tabs span.on{background:#F8A5C2;color:#fff;border-color:#F8A5C2}
+.upcard{background:linear-gradient(135deg,#FFF0F5,#EDE4F3);border:2px dashed #F3E5F5;border-radius:16px;padding:16px;margin-bottom:12px}
+.mi{display:inline-block;width:48%;background:#fff;border-radius:16px;padding:18px 0;text-align:center;cursor:pointer;border:1px solid rgba(248,165,194,0.3);margin:0 1% 10px;vertical-align:top}
+.mi:active{transform:scale(.95)}.mi .i{font-size:32px}.mi .t{font-size:13px;font-weight:600;color:#6B5B6B;margin-top:4px}
+.panel-content{display:none}
+</style>
+</head>
+<body>
+<div class="app">
+  <div id="loginBox" style="text-align:center;padding-top:60px">
+    <div style="font-size:48px">🔐</div>
+    <h2 style="color:#FF69B4;margin:12px 0">后台管理</h2>
+    <p style="color:#A899A8;font-size:13px;margin-bottom:20px">输入账号密码登录</p>
+    <input id="luInput" placeholder="用户名" value="admin" style="width:100%;max-width:300px;padding:14px;border-radius:25px;border:2px solid rgba(248,165,194,0.3);margin-bottom:10px;text-align:center;font-size:15px;outline:none"><br>
+    <input id="lpInput" type="password" placeholder="密码" style="width:100%;max-width:300px;padding:14px;border-radius:25px;border:2px solid rgba(248,165,194,0.3);margin-bottom:14px;text-align:center;font-size:15px;outline:none" onkeyup="if(event.key==='Enter')doLogin2()"><br>
+    <button class="btn bp" style="width:100%;max-width:300px" onclick="doLogin2()">登录</button>
+    <p id="loginMsg" style="color:#f44336;font-size:13px;margin-top:10px"></p>
+  </div>
+
+  <div id="adminBox" style="display:none">
+    <div class="topbar"><span>🎀 Kitty 后台管理</span><button onclick="doLogout()">退出</button></div>
+    <div style="margin-top:10px">
+
+      <div id="panel-menu" class="panel-content" style="display:block">
+        <div style="text-align:center;padding:12px"><div style="font-size:40px">🎀</div><div style="font-size:15px;font-weight:600;color:#6B5B6B">欢迎回来，Kitty 守护者 💗</div></div>
+        <div class="mi" onclick="switchPanel('words')"><div class="i">&#x1F4AC;</div><div class="t">话术管理</div></div>
+        <div class="mi" onclick="switchPanel('apology')"><div class="i">&#x1F4DC;</div><div class="t">保证书</div></div>
+        <div class="mi" onclick="switchPanel('stories')"><div class="i">&#x1F319;</div><div class="t">故事+录音</div></div>
+        <div class="mi" onclick="switchPanel('benefits')"><div class="i">&#x1F381;</div><div class="t">福利商城</div></div>
+        <div class="mi" onclick="switchPanel('cards')"><div class="i">&#x1F6E1;</div><div class="t">豁免卡</div></div>
+        <div class="mi" onclick="switchPanel('annis')"><div class="i">&#x1F4C5;</div><div class="t">纪念日</div></div>
+        <div class="mi" onclick="switchPanel('truths')"><div class="i">&#x1F4AC;</div><div class="t">真心话</div></div>
+        <div class="mi" onclick="switchPanel('chem')"><div class="i">&#x1F3AF;</div><div class="t">默契题</div></div>
+        <div class="mi" onclick="switchPanel('config')"><div class="i">&#x2699;</div><div class="t">系统设置</div></div>
+        <div class="mi" onclick="switchPanel('surprise')"><div class="i">&#x1F381;</div><div class="t">每日惊喜</div></div>
+        <div class="mi" onclick="switchPanel('records')"><div class="i">&#x1F4CA;</div><div class="t">数据查看</div></div>
+      </div>
+
+      <div id="panel-words" class="panel-content">
+        <p style="color:#FF69B4;cursor:pointer;margin-bottom:10px" onclick="switchPanel('menu')">&larr; 返回</p>
+        <div class="tabs"><span id="wt1" class="on" onclick="wcat=1;loadWords();wtOn(1)">轻微生气</span><span id="wt2" onclick="wcat=2;loadWords();wtOn(2)">超级生气</span><span id="wt3" onclick="wcat=3;loadWords();wtOn(3)">委屈难过</span></div>
+        <div class="upcard"><h3>上传视频/录音(MP4)</h3><input type="file" accept="audio/*,video/*" onchange="uploadFile(this,'wvu')"><p id="wvu_msg" style="display:none;margin-top:6px;font-size:12px;color:#FF69B4">OK <span id="wvu_url"></span> <button class="btn bo bs2" onclick="copyText(document.getElementById('wvu_url').textContent)">复制</button></p></div>
+        <div class="card"><h3>新增话术</h3><div class="fr"><textarea id="adminNw" placeholder="输入话术..."></textarea></div><div class="fr"><input id="adminNwv" placeholder="语音URL(粘贴上方URL)"></div><button class="btn bp" onclick="addWord()">添加</button></div>
+        <div class="card"><h3>话术列表(<span id="wordCount">0</span>)</h3><div id="wordList"></div></div>
+      </div>
+
+      <div id="panel-apology" class="panel-content">
+        <p style="color:#FF69B4;cursor:pointer;margin-bottom:10px" onclick="switchPanel('menu')">&larr; 返回</p>
+        <div class="upcard"><h3>上传保证书录音</h3><input type="file" accept="audio/*,video/*" onchange="uploadFile(this,'apv')"><p id="apv_msg" style="display:none;margin-top:6px;font-size:12px;color:#FF69B4">OK <span id="apv_url"></span> <button class="btn bo bs2" onclick="copyText(document.getElementById('apv_url').textContent)">复制</button></p></div>
+        <div class="card"><h3>编辑认错保证书</h3><div class="fr"><input id="apTitle" placeholder="标题"></div><div class="fr"><textarea id="apContent" placeholder="保证书全文..." style="min-height:180px"></textarea></div><div class="fr"><input id="apVoiceUrl" placeholder="语音URL(粘贴上方URL)"></div><button class="btn bp" onclick="saveApology()">保存</button></div>
+      </div>
+
+      <div id="panel-stories" class="panel-content">
+        <p style="color:#FF69B4;cursor:pointer;margin-bottom:10px" onclick="switchPanel('menu')">&larr; 返回</p>
+        <div class="upcard"><h3>第一步：上传你的录音/视频</h3><input type="file" accept="audio/*,video/*" onchange="uploadFile(this,'suv')"><p id="suv_msg" style="display:none;margin-top:6px;font-size:12px;color:#FF69B4">OK <span id="suv_url"></span> <button class="btn bo bs2" onclick="copyText(document.getElementById('suv_url').textContent)">复制URL</button></p></div>
+        <div class="card" style="background:#FFF9C4;border:2px solid #FFD54F"><h3>第二步：选择故事绑定录音</h3><p style="font-size:12px;color:#F57F17;margin-bottom:8px">先复制上方URL，再选择故事，粘贴URL，点绑定</p><div class="fr"><select id="bindStorySelect" style="flex:1;padding:10px;border:2px solid rgba(248,165,194,0.3);border-radius:12px"><option value="0">-- 选择故事 --</option></select></div><div class="fr"><input id="bindVoiceInput" placeholder="粘贴录音URL到这里"></div><button class="btn bp" onclick="bindVoiceToStory()">绑定录音到选中故事</button></div>
+        <div class="card"><h3>新增故事</h3><div class="fr"><input id="nsTitle" placeholder="故事标题"></div><div class="fr"><textarea id="nsContent" placeholder="故事内容..."></textarea></div><button class="btn bp" onclick="addStory()">添加</button></div>
+        <div class="card"><h3>故事列表（🎙️=已录音）</h3><div id="storyList"></div></div>
+      </div>
+
+      <div id="panel-benefits" class="panel-content">
+        <p style="color:#FF69B4;cursor:pointer;margin-bottom:10px" onclick="switchPanel('menu')">&larr; 返回</p>
+        <div class="upcard"><h3>上传商品图片</h3><input type="file" accept="image/*" onchange="uploadFile(this,'gimg','image')"><p id="gimg_msg" style="display:none;margin-top:6px;font-size:12px;color:#FF69B4">OK <span id="gimg_url"></span></p></div>
+        <div class="card"><h3>新增商品</h3><div class="fr"><input id="ngName" placeholder="商品名称"></div><div class="fr"><input id="ngPoints" placeholder="所需积分" type="number"></div><div class="fr"><input id="ngDesc" placeholder="描述"></div><div class="fr"><input id="ngImg" placeholder="图片URL(粘贴上方URL)"></div><button class="btn bp" onclick="addGoods()">添加</button></div>
+        <div class="card"><h3>商品列表</h3><div id="goodsList"></div></div>
+        <div class="card"><h3>兑换记录</h3><div id="exList"></div></div>
+      </div>
+
+      <div id="panel-cards" class="panel-content">
+        <p style="color:#FF69B4;cursor:pointer;margin-bottom:10px" onclick="switchPanel('menu')">&larr; 返回</p>
+        <div class="card"><h3>新增豁免卡</h3><div class="fr"><input id="ncName" placeholder="卡名称"></div><div class="fr"><select id="ncStyle"><option value="1">粉色爱心</option><option value="2">紫色星月</option><option value="3">金色皇冠</option></select><input id="ncDays" placeholder="有效期(天,空=永久)" type="number" style="width:140px"></div><button class="btn bp" onclick="addCardDef()">添加</button></div>
+        <div class="card"><h3>授予豁免卡</h3><div class="fr"><select id="gci"><option value="0">选卡类型</option></select><input id="gq" placeholder="数量" type="number" value="1" style="width:80px"></div><button class="btn bp" onclick="grantCard()">授予</button></div>
+        <div class="card"><h3>卡类型</h3><div id="cardList"></div></div>
+      </div>
+
+      <div id="panel-annis" class="panel-content">
+        <p style="color:#FF69B4;cursor:pointer;margin-bottom:10px" onclick="switchPanel('menu')">&larr; 返回</p>
+        <div class="card"><h3>添加纪念日</h3><div class="fr"><input id="naName" placeholder="名称"></div><div class="fr"><input id="naDate" type="date"></div><div class="fr"><select id="naRt"><option value="1">每年重复</option><option value="2">仅一次</option></select><input id="naIcon" placeholder="图标" value="💝" style="width:100px"></div><button class="btn bp" onclick="addAnni()">保存</button></div>
+        <div class="card"><h3>纪念日列表</h3><div id="anniList"></div></div>
+      </div>
+
+      <div id="panel-truths" class="panel-content">
+        <p style="color:#FF69B4;cursor:pointer;margin-bottom:10px" onclick="switchPanel('menu')">&larr; 返回</p>
+        <div class="card"><h3>新增真心话</h3><div class="fr"><select id="truthCat"><option value="1">回忆类</option><option value="2">期待类</option><option value="3">日常类</option></select></div><div class="fr"><textarea id="truthQ" placeholder="输入问题..."></textarea></div><button class="btn bp" onclick="addTruth()">添加</button></div>
+        <div class="card"><h3>题库</h3><div class="tabs"><span id="tt0" class="on" onclick="truthCatFilter=0;loadTruths();ttOn(0)">全部</span><span id="tt1" onclick="truthCatFilter=1;loadTruths();ttOn(1)">回忆</span><span id="tt2" onclick="truthCatFilter=2;loadTruths();ttOn(2)">期待</span><span id="tt3" onclick="truthCatFilter=3;loadTruths();ttOn(3)">日常</span></div><div id="truthList"></div></div>
+      </div>
+
+      <div id="panel-chem" class="panel-content">
+        <p style="color:#FF69B4;cursor:pointer;margin-bottom:10px" onclick="switchPanel('menu')">&larr; 返回</p>
+        <div class="card"><h3>新增默契题</h3><div class="fr"><input id="chemQ" placeholder="题目"></div><div class="fr"><input id="chemOpts" placeholder="4个选项(逗号分隔)"></div><div class="fr"><input id="chemAns" placeholder="答案序号(0-3)" type="number" min="0" max="3"></div><button class="btn bp" onclick="addChem()">添加</button></div>
+        <div class="card"><h3>题库(<span id="chemCount">0</span>题)</h3><div id="chemList"></div></div>
+      </div>
+
+      <div id="panel-config" class="panel-content">
+        <p style="color:#FF69B4;cursor:pointer;margin-bottom:10px" onclick="switchPanel('menu')">&larr; 返回</p>
+        <div class="card"><h3>系统配置</h3>
+          <div class="fr"><span style="width:85px;font-size:12px;line-height:2.5">页面标语</span><input id="cfgSlogan"></div>
+          <div class="fr"><span style="width:85px;font-size:12px;line-height:2.5">女主昵称</span><input id="cfgGirl"></div>
+          <div class="fr"><span style="width:85px;font-size:12px;line-height:2.5">男主昵称</span><input id="cfgBoy"></div>
+          <div class="fr"><span style="width:85px;font-size:12px;line-height:2.5">在一起日期</span><input id="cfgLoveDate" type="date"></div>
+          <div class="fr"><span style="width:85px;font-size:12px;line-height:2.5">访问密码</span><input id="cfgPwd"></div>
+          <div class="fr"><span style="width:85px;font-size:12px;line-height:2.5">主题色</span><input id="cfgColor" type="color"></div>
+          <button class="btn bp" style="width:100%" onclick="saveConfig()">保存配置</button>
+        </div>
+      </div>
+
+      <div id="panel-surprise" class="panel-content">
+        <p style="color:#FF69B4;cursor:pointer;margin-bottom:10px" onclick="switchPanel('menu')">&larr; 返回</p>
+        <div class="card"><h3>新增惊喜内容</h3><div class="fr"><select id="surType"><option value="1">💌情话卡片</option><option value="2">🧧积分红包</option><option value="3">🏷️临时折扣</option><option value="4">🥚彩蛋</option></select></div><div class="fr"><input id="surContent" placeholder="惊喜文字内容"></div><div class="fr"><input id="surPoints" placeholder="积分数量(仅红包)" type="number"></div><button class="btn bp" onclick="addSurprise()">添加</button></div>
+        <div class="card"><h3>惊喜库(随机抽取)</h3><div id="surList"></div></div>
+      </div>
+
+      <div id="panel-records" class="panel-content">
+        <p style="color:#FF69B4;cursor:pointer;margin-bottom:10px" onclick="switchPanel('menu')">&larr; 返回</p>
+        <div class="card"><h3>情绪记录</h3><div id="moodList"></div></div>
+        <div class="card"><h3>留言记录</h3><div id="msgList"></div></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="/js/admin.js"></script>
+</body>
+</html>
