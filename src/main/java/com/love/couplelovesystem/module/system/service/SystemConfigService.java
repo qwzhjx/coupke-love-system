@@ -6,7 +6,8 @@ import com.love.couplelovesystem.entity.SystemConfig;
 import com.love.couplelovesystem.mybatis.mapper.SystemConfigMapper;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
+import org.springframework.boot.context.event.ApplicationStartedEvent;
+import org.springframework.context.event.EventListener;
 import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +25,7 @@ public class SystemConfigService {
     /**
      * 初始化默认配置
      */
-    @PostConstruct
+    @EventListener(ApplicationStartedEvent.class)
     public void initConfig() {
         initIfAbsent("access_password", "5201314");
         initIfAbsent("page_slogan", "🎀 Hello Kitty · 专属宠爱只属于你 🎀");
