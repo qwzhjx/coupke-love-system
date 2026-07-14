@@ -33,7 +33,7 @@ public class DatabaseInitializer {
             boolean needInit = false;
             try (Statement stmt = conn.createStatement()) {
                 ResultSet rs = stmt.executeQuery(
-                    "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'T_SYSTEM_CONFIG'");
+                    "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 't_system_config'");
                 if (rs.next() && rs.getInt(1) == 0) {
                     needInit = true;
                 }
@@ -44,7 +44,7 @@ public class DatabaseInitializer {
             // 表存在但为空（首次启动时 schema.sql 未通过 Spring 执行）
             if (!needInit) {
                 try (Statement stmt = conn.createStatement()) {
-                    ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM T_SYSTEM_CONFIG");
+                    ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM t_system_config");
                     if (rs.next() && rs.getInt(1) == 0) {
                         needInit = true;
                     }
