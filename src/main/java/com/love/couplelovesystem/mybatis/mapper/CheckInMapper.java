@@ -15,6 +15,6 @@ public interface CheckInMapper extends BaseMapper<CheckIn> {
     @Select("SELECT check_date FROM t_check_in WHERE role = #{role} AND check_date >= #{startDate} AND check_date <= #{endDate} ORDER BY check_date")
     List<Date> getCheckInDates(@Param("role") Integer role, @Param("startDate") String startDate, @Param("endDate") String endDate);
 
-    @Select("SELECT COUNT(*) FROM (SELECT check_date, DATE_SUB(check_date, INTERVAL ROW_NUMBER() OVER (ORDER BY check_date) DAY) AS grp FROM t_check_in WHERE role = #{role}) t GROUP BY grp ORDER BY COUNT(*) DESC LIMIT 1")
+    @Select("SELECT COALESCE(MAX(c), 0) FROM (SELECT COUNT(*) AS c FROM (SELECT check_date, DATEADD('DAY', -ROW_NUMBER() OVER (ORDER BY check_date), check_date) AS grp FROM t_check_in WHERE role = #{role}) GROUP BY grp)")
     Integer getMaxConsecutiveDays(@Param("role") Integer role);
 }
