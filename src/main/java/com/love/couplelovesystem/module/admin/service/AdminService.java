@@ -7,10 +7,8 @@ import com.love.couplelovesystem.entity.Admin;
 import com.love.couplelovesystem.mybatis.mapper.AdminMapper;
 import org.springframework.stereotype.Service;
 
-import org.springframework.boot.context.event.ApplicationStartedEvent;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import javax.annotation.Resource;
 
 /**
@@ -25,8 +23,7 @@ public class AdminService {
     /**
      * 初始化默认管理员账号
      */
-    @Order(Ordered.LOWEST_PRECEDENCE)
-    @EventListener(ApplicationStartedEvent.class)
+    @EventListener(ApplicationReadyEvent.class)
     public void initAdmin() {
         QueryWrapper<Admin> qw = new QueryWrapper<>();
         qw.eq("username", "admin");
