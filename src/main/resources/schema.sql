@@ -214,7 +214,7 @@ CREATE TABLE IF NOT EXISTS t_benefit_exchange (
 -- ========== 默认数据 ==========
 
 -- 默认系统配置（管理员由程序自动创建）
-INSERT INTO t_system_config (config_key, config_value) VALUES
+INSERT IGNORE INTO t_system_config (config_key, config_value) VALUES
 ('access_password', '5201314'),
 ('page_slogan', '🎀 Hello Kitty · 专属宠爱只属于你 🎀'),
 ('boy_nickname', '宝宝'),
@@ -223,7 +223,7 @@ INSERT INTO t_system_config (config_key, config_value) VALUES
 ('theme_color', '#F8A5C2');
 
 -- 系统内置睡前故事（5篇）
-INSERT INTO t_bedtime_story (title, content, source) VALUES
+INSERT IGNORE INTO t_bedtime_story (title, content, source) VALUES
 ('小兔子的睡前故事', '从前，在一片美丽的大森林里，住着一只可爱的小兔子。每天晚上，小兔子都会望着天空中的星星，想着远方的那只小兔子。她们虽然相隔很远，但每晚都会在同一时间看着同一片星空，心里暖暖的。小兔子知道，不管距离多远，真心相爱的两颗心永远都在一起。晚安，我最爱的小兔子。🌟', 1),
 ('最温柔的月光', '你知道吗？月亮之所以那么温柔，是因为它承载了太多人的思念。今晚的月光特别美，我想把最美的月光都收集起来，送给你。当你闭上眼睛的时候，月光会轻轻落在你的脸上，就像我的吻一样温柔。睡吧，我的宝贝，明天醒来又是一个有我的好天气。💤', 1),
 ('星星与大海的约定', '在遥远的海边，有一颗最亮的星星和一片最蓝的大海。星星每天晚上都会把光芒洒在海面上，大海则用温柔的波浪回应它。它们约定好，无论多少个夜晚过去，都要这样彼此陪伴。就像我们一样，无论经历什么，都会一直一直在一起。晚安，我的星星。✨', 1),
@@ -231,7 +231,7 @@ INSERT INTO t_bedtime_story (title, content, source) VALUES
 ('花与蝴蝶的梦', '花园里有一朵最美的花，每天都会有一只蝴蝶飞来陪它。蝴蝶告诉花说："世界很大，但我只想停在你的花瓣上。"花笑了，花瓣轻轻摇动。它们一起做了一个很甜很甜的梦，梦里有花、有蝴蝶、还有永远不会结束的春天。晚安，愿你梦里有我。🦋', 1);
 
 -- 系统内置真心话问题
-INSERT INTO t_truth_question (category, question, source) VALUES
+INSERT IGNORE INTO t_truth_question (category, question, source) VALUES
 (1, '我们第一次见面的时候，你心里是怎么想的？', 1),
 (1, '你觉得我们的感情里，最让你心动的一个瞬间是什么？', 1),
 (1, '如果用一首歌来形容我们的爱情，你会选哪一首？', 1),
@@ -244,7 +244,7 @@ INSERT INTO t_truth_question (category, question, source) VALUES
 (3, '用三个词来形容今天的我吧~', 1);
 
 -- 更多睡前故事（可爱诙谐风）
-INSERT INTO t_bedtime_story (title, content, source) VALUES
+INSERT IGNORE INTO t_bedtime_story (title, content, source) VALUES
 ('月亮上的奶茶店', '月亮背面有一家只开在深夜的奶茶店，老板是一只胖胖的月兔。它的招牌是"安眠波波茶"，喝一口眼皮就开始打架。月兔说："这杯免费送给你，因为你今天也很努力啦~"喝完这杯魔法奶茶，你倒头就睡，梦里还有珍珠在蹦迪。晚安，吸溜~🧋', 1),
 ('恐龙宝宝的烦恼', '有一只小恐龙，它的脖子太长了，每天睡觉都找不到合适的枕头。它试过石头、木头、云朵，全都不行。最后它想到一个好办法——把脖子盘成一个圈，自己枕着自己睡！第二天脖子打结了，被朋友们笑了三天。但它说："值了，那是我睡得最香的一晚！"🦕', 1),
 ('会下糖果雨的云', '天空有一朵特别的云，别家下雨它下糖果。小朋友们天天在它下面等。有一次它感冒了，打了个喷嚏，下了一地棉花糖。小动物们乐疯了，在棉花糖里打滚。云朵说："别吃太多哦，不然睡不着觉~"于是它降下温牛奶味的雨，大家喝完都乖乖睡了。☁️🍬', 1),
@@ -281,7 +281,7 @@ INSERT INTO t_bedtime_story (title, content, source) VALUES
 ('十万个为什么里的晚安', '一个小朋友（据说就是你）每天睡前要问十万个为什么才肯睡。今天的问题包括："为什么天是蓝的？为什么月亮不会掉下来？为什么影子会跟着我？为什么被窝越睡越暖？"当你问到第99999个的时候，回答你的人已经睡着了——那没关系。因为第100000个问题是："明天还会爱我吗？"答案是肯定的。永远肯定。明天见也是。💙', 2);
 
 -- 默契测试题（默认10题）
-INSERT INTO t_chemistry_question (question, opts, answer) VALUES
+INSERT IGNORE INTO t_chemistry_question (question, opts, answer) VALUES
 ('宝宝最喜欢的颜色？', '["粉色","蓝色","黑色","白色"]', 0),
 ('宝宝最爱的食物？', '["火锅","烧烤","甜点","家常菜"]', 2),
 ('宝宝最想去旅行的地方？', '["海边","山里","城市","古镇"]', 0),
