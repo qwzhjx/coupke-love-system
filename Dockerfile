@@ -9,6 +9,6 @@ RUN mvn clean package -DskipTests -q
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
-RUN mkdir -p ./upload/photos ./upload/voices ./upload/materials
+RUN mkdir -p /app/upload/photos /app/upload/voices /app/upload/materials
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=prod"]
