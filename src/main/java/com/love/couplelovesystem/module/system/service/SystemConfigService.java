@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +27,7 @@ public class SystemConfigService {
     /**
      * 初始化默认配置
      */
+    @Order(Ordered.LOWEST_PRECEDENCE)
     @EventListener(ApplicationStartedEvent.class)
     public void initConfig() {
         initIfAbsent("access_password", "5201314");

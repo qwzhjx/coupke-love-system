@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import javax.annotation.Resource;
 
 /**
@@ -23,6 +25,7 @@ public class AdminService {
     /**
      * 初始化默认管理员账号
      */
+    @Order(Ordered.LOWEST_PRECEDENCE)
     @EventListener(ApplicationStartedEvent.class)
     public void initAdmin() {
         QueryWrapper<Admin> qw = new QueryWrapper<>();
