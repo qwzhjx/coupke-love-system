@@ -45,6 +45,13 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- H2 嵌入式数据库（免费部署用） -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- Hutool 工具类 -->
         <dependency>
             <groupId>cn.hutool</groupId>
